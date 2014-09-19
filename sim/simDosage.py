@@ -284,6 +284,7 @@ def main(args):
                         handlers=[logging.StreamHandler()])
 
     args = argp.parse_args(args)
+    #import pdb; pdb.set_trace()
     pop = Population.from_bed_files(args.bed_file_prefix, BIM)
     geno = pop.genotype_matrix
 
@@ -301,7 +302,7 @@ def main(args):
         row = []
         for jdx in range(m):
             gij = geno[idx, jdx]
-            if cov[idx, jdx] != 0:
+            if cov[idx, jdx] > 0:
                 count = sum(get_count(gij, args.errorrate) for count in range(cov[idx, jdx]))
             else:
                 count = 0

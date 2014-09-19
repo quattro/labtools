@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 import argparse as ap
-import gzip
 import math
 import os
 import random as rdm
@@ -15,14 +14,14 @@ HETER = 1
 
 def gen_fam(num_pop, prefix):
     fam = []
-    with gzip.open("{}.fam.gz".format(prefix), "w") as famfile:
+    with open("{}.fam".format(prefix), "w") as famfile:
         counter = 0
         for idx in range(num_pop):
             fid = "FID{}".format(idx)
             iid = "IID{}".format(idx)
             wf = str(counter)
             wm = str(counter + 1)
-            sex = rdm.choice(['1', '2'])
+            sex = rdm.choice(['1', '2']) # this might be better as 0
             pheno = "0" # dummy value.
             row = [fid, iid, wf, wm, sex, pheno]
             famfile.write(" ".join(row) + os.linesep)
@@ -37,22 +36,20 @@ def gen_map(num_vars, prefix):
     pmorgans = "0"
     alleles = ["A", "C", "G", "T"]
     map = []
-    with open("{}.map".format(prefix), "w") as bimfile:
+    with open("{}.map".format(prefix), "w") as mapfile:
         for id in range(num_vars):
             vid = "SNP{}".format(id)
             minor, major = rdm.sample(alleles, 2)
             row = [chcode, vid, pmorgans, str(id), minor, major] 
             line = " ".join(row)
             map.append(row)
-
-            bimfile.write(line + os.linesep)
+            mapfile.write(line[:-3] + os.linesep)
 
     return map
 
-
 def gen_ped(g, fam, map, prefix):
     n, v = g.shape
-    with gzip.open("{}.ped.gz".format(prefix), "w") as pedfile:
+    with open("{}.ped".format(prefix), "w") as pedfile:
         for idx, row in enumerate(g):
             famstr = fam[idx]
             calls = []
