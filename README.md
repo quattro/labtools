@@ -1,4 +1,3 @@
 blabbertools
 =========
-
-Repo for common tools/scripts
+Common tools/scripts for Bogdan-Lab users
