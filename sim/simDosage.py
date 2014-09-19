@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 import argparse as ap
 import gzip
+import logging
 import os
 import random as rdm
 import sys
@@ -277,6 +278,10 @@ def main(args):
     argp.add_argument("mlout" help="Path to where the mach dosage info will be output (gzipped)") 
     argp.add_argument("-e", "--errorrate", type=float, help="Sequencing error rate.",
                       default=0.01)
+
+    logging.basicConfig(level=logging.DEBUG,
+                        format="%(asctime)s - %(levelname)s - %(message)s",
+                        handlers=[logging.StreamHandler()])
 
     args = argp.parse_args(args)
     pop = geosnp.Population.from_bed_files(args.bed_file_prefix, args.bed_map_mode)
