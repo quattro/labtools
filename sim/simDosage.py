@@ -271,11 +271,11 @@ def main(args):
     dsc = "{}{}{}".format(s1, os.linesep, s2)
 
     argp = ap.ArgumentParser(description=dsc)
-    parser.add_argument("bed_file_prefix", help="The prefix for the bed-file group")
+    argp.add_argument("bed_file_prefix", help="The prefix for the bed-file group")
     argp.add_argument("cov", type=float, help="The coverage amount.")
     argp.add_argument("freq", type=float, help="Minor allele freq") # this can be estimated directly from genotype
-    argp.add_argument("machout" help="Path to where the mach dosage will be output (gzipped)") 
-    argp.add_argument("mlout" help="Path to where the mach dosage info will be output (gzipped)") 
+    argp.add_argument("machout", help="Path to where the mach dosage will be output (gzipped)") 
+    argp.add_argument("mlout", help="Path to where the mach dosage info will be output (gzipped)") 
     argp.add_argument("-e", "--errorrate", type=float, help="Sequencing error rate.",
                       default=0.01)
 
@@ -284,7 +284,8 @@ def main(args):
                         handlers=[logging.StreamHandler()])
 
     args = argp.parse_args(args)
-    pop = geosnp.Population.from_bed_files(args.bed_file_prefix, args.bed_map_mode)
+    pop = Population.from_bed_files(args.bed_file_prefix, BIM)
+    geno = pop.genotype_matrix
 
     n, m = len(pop), pop.num_snps()
 
