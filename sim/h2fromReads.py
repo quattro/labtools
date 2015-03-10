@@ -56,11 +56,11 @@ def main(args):
         num1s = np.zeros(m)
         num1s[covs != 0] = sts.binom.rvs(covs[covs != 0], 1 - args.errorrate)
 
-        # flip num1s for homozygotic minor case
+        # flip num1s for homozygous minor case
         mask = sgeno == 0
         num1s[mask] = covs[mask] - num1s[mask]
 
-        # simulate reads for heterozygotic case where coverage is positive
+        # simulate reads for heterozygous case where coverage is positive
         mask = np.logical_and(sgeno == 1, covs != 0)
         num1s[mask] = sts.binom.rvs(covs[mask], 0.5)
 

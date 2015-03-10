@@ -124,8 +124,7 @@ def emREML(A, y, Var, X=None, calc_se=True, bounded=False, max_iter=100, verbose
         it += 1
 
         if verbose:
-            total = sum(Var)
-            print logL, Var[0]/total, Var[1]/total
+            print logL, Var[0], Var[1]
 
     if not calc_se:
         final = Var
@@ -189,6 +188,8 @@ def aiREML(A, y, Var, X=None, calc_se=True, bounded=False, max_iter=100, verbose
         # Average information matrix
         for i in range(r):
             for j in range(r):
+                # this is really just to slightly optimize...
+                # Ai, Aj == I in the (r - 1) cases
                 if i == (r - 1) and j == (r - 1):
                     AI[i, j] = dots([y.T, P, P, P, y]) 
                 elif i == (r - 1):
@@ -202,7 +203,9 @@ def aiREML(A, y, Var, X=None, calc_se=True, bounded=False, max_iter=100, verbose
 
         # Vector of first derivatives of log likelihood function
         for i in range(r):
-            if i == r - 1:
+            # this is really just to slightly optimize...
+            # Ai == I in the (r - 1) cases
+            if i == (r - 1):
                 s[i, 0] = np.trace(P) - dots([y.T, P, P, y]) 
             else:
                 Ai = A[i]
@@ -227,8 +230,7 @@ def aiREML(A, y, Var, X=None, calc_se=True, bounded=False, max_iter=100, verbose
         logL = new_logL
 
         if verbose:
-            total = sum(Var)
-            print logL, Var[0]/total, Var[1]/total
+            print logL, Var[0], Var[1]
 
         if bounded:
             if min(Var/sum(Var)) < 0:
