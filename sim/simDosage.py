@@ -233,16 +233,16 @@ def read_genotype(item, pos):
 
 def get_count(call, erate):
     val = 0
+    r = rdm.random()
     if call == 0:
-        r = rdm.random()
         if r <= erate:
             val = 1
         else:
             val = 0
     elif call == 1:
-        val = 0.5
+        if r < 0.5:
+            val = 1
     elif call == 2:
-        r = rdm.random()
         if r <= erate:
             val = 0
         else:
@@ -256,7 +256,7 @@ def get_likeli(call, count, cov, erate):
     if call == 0:
         val = ((1 - erate) ** (cov - count)) * (erate ** count)
     elif call == 1:
-        val = 0.5 ** count
+        val = 0.5 ** cov
     elif call == 2:
         val = (erate ** (cov - count)) * ((1 - erate) ** count)
     else:
@@ -297,6 +297,7 @@ def main(args):
     
     # this can be found by simple summation / 2N; but for now (in conjunction with geno sim)
     # this is fine.
+    g = np.arange(3)
     freq = args.freq 
     for idx in range(n):
         row = []
@@ -306,8 +307,15 @@ def main(args):
                 count = sum(get_count(gij, args.errorrate) for count in range(cov[idx, jdx]))
             else:
                 count = 0
-            likes = [get_likeli(call, count, cov[idx, jdx], args.errorrate) for call in range(3)]
-            dose = (2 * likes[2] * (freq ** 2)) + (2 * likes[1] * (freq * (1 - freq)))
+
+            # likelihoods
+            likes = np.array([get_likeli(call, count, cov[idx, jdx], args.errorrate) for call in range(3)])
+
+            # prior of observing genotype
+            probs = np.array([(1 - freq) ** 2, 2 * freq * (1 - freq), freq ** 2])
+
+            # dosage = expected genotype under posterior
+            dose = sum(likes * probs * g) / sum(likes * probs)
             row.append(dose)
         
         id = "IID{}".format(idx)
