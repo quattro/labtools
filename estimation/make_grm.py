@@ -155,7 +155,7 @@ def calc_grm(vcf, args):
         pos = row[1]
         key = row[2]
 
-        row, cov = parse_line(row, probs, opt)
+        row, cov = parse_line(row, probs, args)
         rows.append(row)
         covs.append(cov)
         if len(row) == args.max_snp:
