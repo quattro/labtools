@@ -36,7 +36,7 @@ SCALE_M = "M"
 SCALES = [SCALE_P, SCALE_M]
 
 
-def get_posteriors(row, probs):
+def get_posteriors(row, probs, args):
     n, p = probs.shape
 
     format = row[FORMAT].split(":")
@@ -66,7 +66,7 @@ def get_posteriors(row, probs):
         val = -np.log((probs * fs.T).sum(axis=1)).sum()
         return val
 
-    if opt[MAF] == "MAF_R":
+    if args.maf == MAF_R:
         # estimate MAF directly from reads
         vals = [slice(0.01, 0.49, 0.01)]
         f = opt.brute(nll, ranges=vals)
@@ -77,7 +77,7 @@ def get_posteriors(row, probs):
         # get posterior mean = dosage
         dose = np.array(map(lambda x: sum(G * x), probs))
 
-        if opt[ENC] == "ENC_B":
+        if args.encoding == ENC_B:
             # round to best-guess genotype
             dose = np.round(dose)
     else:
@@ -86,7 +86,7 @@ def get_posteriors(row, probs):
 
         # get posterior mean = dosage
         dose = np.array(map(lambda x: sum(G * x), probs))
-        if opt[ENC] == "ENC_D":
+        if args.encoding == ENC_D:
             # estimate MAF from genotypes
             maf = np.mean(dose) / 2.0
         else:
@@ -97,13 +97,13 @@ def get_posteriors(row, probs):
     return dose, maf, miss
 
 
-def parse_line(row, probs, opt):
-    dose, maf, miss = get_posteriors(row, probs, opt)
+def parse_line(row, probs, args):
+    dose, maf, miss = get_posteriors(row, probs, args)
 
     not_miss = np.logical_not(miss)
     dose[not_miss] -= 2 * maf
 
-    if opt[VAR] == "VAR_E":
+    if args.variance == VAR_E:
         dose[not_miss] /= np.sqrt(2 * maf * (1 - maf))
     else:
         dose[not_miss] /= np.std(dose[not_miss], ddof=1)
