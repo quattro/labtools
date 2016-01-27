@@ -1,3 +1,3 @@
 blabbertools
 =========
-Common tools/scripts for Bogdan-Lab users
+Common tools/scripts for GWAS/heritability
