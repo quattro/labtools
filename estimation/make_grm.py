@@ -126,9 +126,7 @@ def calc_sub_grm(rows, covs, args):
         Mtmp = m * np.ones((n,n))
 
     Atmp /= Mtmp
-    Atmp[np.isnan(A)] = 0.0
-    A += Atmp
-    Mtmp += Mtmp
+    Atmp[np.isnan(Atmp)] = 0.0
     return Atmp, Mtmp
 
 
@@ -174,6 +172,29 @@ def calc_grm(vcf, args):
     return A, M, ids
 
 
+def write_grm(prefix, A, M, ids):
+    n, n = A.shape
+    with open("{}.grm.bin".format(prefix), "wb") as grmfile:
+        for idx in range(n):
+            for jdx in range(idx + 1):
+                val = struct.pack('f', A[idx, jdx])
+                grmfile.write(val)
+
+    with open("{}.grm.N.bin".format(prefix), "wb") as grmfile:
+        for idx in range(n):
+            for jdx in range(idx + 1):
+                val = struct.pack('f', M[idx, jdx])
+                grmfile.write(val)
+
+    with open("{}.grm.id".format(prefix), "w") as grmfile:
+        for idx in range(n):
+            fid = ids[idx]
+            iid = ids[idx].replace("F", "I")
+            grmfile.write("\t".join([fid, iid]) + os.linesep)
+
+    return
+
+
 def main(args):
     argp = ap.ArgumentParser(description="")
     argp.add_argument("vcf_file")
@@ -189,24 +210,7 @@ def main(args):
 
     with gzip.open(args.vcf_file, "r") as vcf:
         A, M, ids = calc_grm(vcf, args)
-        n, n = A.shape
-        with open("{}.grm.bin".format(args.prefix), "wb") as grmfile:
-            for idx in range(n):
-                for jdx in range(idx + 1):
-                    val = struct.pack('f', A[idx, jdx])
-                    grmfile.write(val)
-    
-        with open("{}.grm.N.bin".format(args.prefix), "wb") as grmfile:
-            for idx in range(n):
-                for jdx in range(idx + 1):
-                    val = struct.pack('f', M[idx, jdx])
-                    grmfile.write(val)
-    
-        with open("{}.grm.id".format(args.prefix), "w") as grmfile:
-            for idx in range(n):
-                fid = ids[idx]
-                iid = ids[idx].replace("F", "I")
-                grmfile.write("\t".join([fid, iid]) + os.linesep)
+        write_grm(args.prefix, A, M, ids)
 
     return 0
 
