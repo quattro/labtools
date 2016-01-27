@@ -69,7 +69,8 @@ def get_posteriors(row, probs, args):
     if args.maf == MAF_R:
         # estimate MAF directly from reads
         vals = [slice(0.01, 0.49, 0.01)]
-        f = opt.brute(nll, ranges=vals)
+        f = opt.brute(nll, ranges=vals)[0]
+        
         fs = np.array([(1 - f) ** 2, 2 * f * (1 - f), f ** 2])
         # convert likelihoods to posterior probabilities
         probs = ((probs * fs).T / (probs * fs).sum(axis=1)).T
@@ -168,7 +169,6 @@ def calc_grm(vcf, args):
         A += Atmp
         M += Mtmp
 
-
     return A, M, ids
 
 
@@ -189,16 +189,16 @@ def write_grm(prefix, A, M, ids):
     with open("{}.grm.id".format(prefix), "w") as grmfile:
         for idx in range(n):
             fid = ids[idx]
-            iid = ids[idx].replace("F", "I")
+            iid = ids[idx]
             grmfile.write("\t".join([fid, iid]) + os.linesep)
 
     return
 
 
 def main(args):
-    argp = ap.ArgumentParser(description="")
-    argp.add_argument("vcf_file")
-    argp.add_argument("prefix")
+    argp = ap.ArgumentParser(description="Estimate the GRM from genotype likelihoods (GL) in gzipped VCF file.")
+    argp.add_argument("vcf_file", help="Path to gzipped vcf file.")
+    argp.add_argument("prefix", help="Output prefix for GRM. Encoded GCTA-style.")
     argp.add_argument("-e", "--encoding", choices=ENCS, default=ENC_D, help="Encoding of genotype.")
     argp.add_argument("-v", "--variance", choices=VARS, default=VAR_S, help="Standardize by sample or expected variance.")
     argp.add_argument("-f", "--maf", choices=MAFS, default=MAF_R, help="Calculate MAF from Reads or Genotype.")
@@ -206,8 +206,6 @@ def main(args):
     argp.add_argument("-m", "--max-snp", type=int, default=50000, help="Window size to use when constructing GRM. Saves memory.")
 
     args = argp.parse_args(args)
-
-
     with gzip.open(args.vcf_file, "r") as vcf:
         A, M, ids = calc_grm(vcf, args)
         write_grm(args.prefix, A, M, ids)
