@@ -157,14 +157,14 @@ def calc_grm(vcf, args):
         row, cov = parse_line(row, probs, args)
         rows.append(row)
         covs.append(cov)
-        if len(row) == args.max_snp:
+        if len(rows) == args.max_snp:
             Atmp, Mtmp = calc_sub_grm(rows, covs, args)
             A += Atmp
             M += Mtmp
             rows[:] = []
             covs[:] = []
 
-    if len(row) > 0:
+    if len(rows) > 0:
         Atmp, Mtmp = calc_sub_grm(rows, covs, args)
         A += Atmp
         M += Mtmp
